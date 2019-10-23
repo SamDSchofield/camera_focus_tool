@@ -6,6 +6,7 @@ but adds rqt reconfigure options to set ROIs to estimate the FDE for which shoul
 
 ## TODO:
 - Push upstream to Kalibr
+- Figure out why the metric doesn't really work
 
 ## References
 
