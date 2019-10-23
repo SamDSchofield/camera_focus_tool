@@ -119,8 +119,8 @@ class CameraFocus:
         output_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2BGR)
 
         full_fde = calculate_fde(np_image)
-        text = "fde: {0}   (minimize this for focus)".format(np.sum(full_fde))
-        cv2.putText(output_image, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 0, 0), thickness=2)
+        text = "fde: {0} (1 = focused)".format(np.sum(full_fde))
+        cv2.putText(output_image, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 0, 255), thickness=2)
 
         if self.width1_percent != 0 and self.height1_percent != 0:
             output_image = draw_roi_fde(np_image, output_image, self.row1_percent, self.col1_percent,
