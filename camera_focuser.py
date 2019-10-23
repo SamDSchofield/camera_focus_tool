@@ -22,6 +22,7 @@ def calculate_fde(image):
     """
     img_float32 = np.float32(image)
     dft = cv2.dft(img_float32, flags=cv2.DFT_COMPLEX_OUTPUT)
+
     dft_shift = np.fft.fftshift(dft)
     magnitude_spectrum = cv2.magnitude(dft_shift[:, :, 0], dft_shift[:, :, 1])
 
@@ -29,7 +30,8 @@ def calculate_fde(image):
     magnitude_spectrum_normalized = magnitude_spectrum / np.sum(magnitude_spectrum)
 
     # frequency domain entropy
-    fde = np.sum(magnitude_spectrum_normalized * np.log(magnitude_spectrum_normalized))
+    fde = -np.sum(magnitude_spectrum_normalized * np.log(magnitude_spectrum_normalized))/np.log(image.shape[0] * image.shape[1])
+    # cv2.waitKey(0)
     return fde
 
 
