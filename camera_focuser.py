@@ -4,6 +4,7 @@ import rospy
 import cv2
 import numpy as np
 from sensor_msgs.msg import Image
+from std_msgs.msg import Float32
 from cv_bridge import CvBridge, CvBridgeError
 import argparse
 from dynamic_reconfigure.server import Server
@@ -75,7 +76,7 @@ def draw_roi_fde(image, output_image, row_percent, col_percent, width_percent, h
     cv2.putText(output_image, text, (col + width, row + height), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
                 color=color,
                 thickness=2)
-    return output_image
+    return output_image, lap_var
 
 
 class CameraFocus:
@@ -92,6 +93,10 @@ class CameraFocus:
         self.height2_percent = 0
 
         self.image_pub = rospy.Publisher("camera_focuser/image", Image, queue_size=1)
+        self.var_pub1 = rospy.Publisher("camera_focuser/full_laplace_var", Float32, queue_size=1)
+        self.var_pub2 = rospy.Publisher("camera_focuser/roi_laplace_var1", Float32, queue_size=1)
+        self.var_pub3 = rospy.Publisher("camera_focuser/roi_laplace_var2", Float32, queue_size=1)
+
         self.reconfigure_server = Server(FocusToolConfig, self.reconfigure_callback)
         self.windowNameOrig = "Camera: {0}".format(self.topic)
         cv2.namedWindow(self.windowNameOrig, 2)
@@ -123,16 +128,22 @@ class CameraFocus:
         output_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2BGR)
 
         lap_var = calculate_focus_laplace(np_image)
+        var1_msg = Float32(lap_var)
+        self.var_pub1.publish(var1_msg)
         text = "Laplacian var: {0} (Higher the better)".format(np.sum(lap_var))
         cv2.putText(output_image, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 0, 255), thickness=2)
 
         if self.width1_percent != 0 and self.height1_percent != 0:
-            output_image = draw_roi_fde(np_image, output_image, self.row1_percent, self.col1_percent,
+            output_image, var = draw_roi_fde(np_image, output_image, self.row1_percent, self.col1_percent,
                                         self.width1_percent, self.height1_percent)
+            var1_msg = Float32(var)
+            self.var_pub2.publish(var1_msg)
 
         if self.width2_percent != 0 and self.height2_percent != 0:
-            output_image = draw_roi_fde(np_image, output_image, self.row2_percent, self.col2_percent,
+            output_image, var = draw_roi_fde(np_image, output_image, self.row2_percent, self.col2_percent,
                                         self.width2_percent, self.height2_percent, (0, 255, 0))
+            var1_msg = Float32(var)
+            self.var_pub3.publish(var1_msg)
 
         image_msg = self.bridge.cv2_to_imgmsg(output_image, encoding="bgr8")
         self.image_pub.publish(image_msg)
