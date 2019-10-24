@@ -35,6 +35,10 @@ def calculate_fde(image):
     return fde
 
 
+def calculate_focus_laplace(image):
+    return cv2.Laplacian(image, cv2.CV_64F).var()
+
+
 def percents_to_pixels(image_width, image_height, row_percent, col_percent, width_percent, height_percent):
     """
     Convert from percents of image to pixel values
@@ -66,8 +70,8 @@ def draw_roi_fde(image, output_image, row_percent, col_percent, width_percent, h
     cv2.rectangle(output_image, pt1, pt2, color, thickness=5)
 
     roi = image[row:row + height, col:col + width]
-    roi_fde = calculate_fde(roi)
-    text = "fde: {0}".format(np.sum(roi_fde))
+    lap_var = calculate_focus_laplace(roi)
+    text = "fde: {0}".format(np.sum(lap_var))
     cv2.putText(output_image, text, (col + width, row + height), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1,
                 color=color,
                 thickness=2)
@@ -118,8 +122,8 @@ class CameraFocus:
 
         output_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2BGR)
 
-        full_fde = calculate_fde(np_image)
-        text = "fde: {0} (1 = focused)".format(np.sum(full_fde))
+        lap_var = calculate_focus_laplace(np_image)
+        text = "Laplacian var: {0} (Higher the better)".format(np.sum(lap_var))
         cv2.putText(output_image, text, (20, 20), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 0, 255), thickness=2)
 
         if self.width1_percent != 0 and self.height1_percent != 0:
