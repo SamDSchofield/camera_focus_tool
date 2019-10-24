@@ -1,15 +1,11 @@
 # Camera focus tool
 Tool to help when focusing camera lenses
 
-Expands on [Kalibr camera focus tool](https://github.com/ethz-asl/kalibr/wiki/camera-focus)
-but adds rqt reconfigure options to set ROIs to estimate the FDE for which should be useful for tuning depth of field.
+Calculates the Laplacian variance for the image and the specified ROIs. Higher variance = better focus.
 
-## TODO:
-- Push upstream to Kalibr
-- Figure out why the metric doesn't really work
+## Usage
+1. Use rqt_reconfigure to shift the ROIs over a siemens star.
+2. Open rqt plot and add the variance topics
+3. Adjust the lens to increase the variance 
 
-## References
 
-Please cite the appropriate papers when using this toolbox or parts of it in an academic publication.
-
-    Matej Kristan, Franjo Pernu. Entropy Based Measure of Camera Focus. University of Ljubljana. Slovenia.
