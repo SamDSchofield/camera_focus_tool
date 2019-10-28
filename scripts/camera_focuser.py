@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""ROS node for estimating the sharpness of an image.
+
+Copyright (c) 2019. Sam Schofield. This file is subject to the 3-clause BSD
+license, as found in the LICENSE file in the top-level directory of this
+distribution and at https://github.com/sds53/camera_focus_tool/LICENSE.
+No part of camera_focus_tool, including this file, may be copied, modified,
+propagated, or distributed except according to the terms contained in the
+LICENSE file.
+"""
 from __future__ import print_function
 import rospy
 import cv2
@@ -9,31 +18,6 @@ from cv_bridge import CvBridge, CvBridgeError
 import argparse
 from dynamic_reconfigure.server import Server
 from camera_focus_tool.cfg import FocusToolConfig
-
-
-def calculate_fde(image):
-    """
-    Calculates the frequency domain entropy.
-    (Entropy Based Measure of Camera Focus. Matej Kristan, Franjo Pernu. University of Ljubljana. Slovenia)
-    Args:
-        image (np.array): Image to calculate the FDE for
-
-    Returns:
-        (float) FDE value of image
-    """
-    img_float32 = np.float32(image)
-    dft = cv2.dft(img_float32, flags=cv2.DFT_COMPLEX_OUTPUT)
-
-    dft_shift = np.fft.fftshift(dft)
-    magnitude_spectrum = cv2.magnitude(dft_shift[:, :, 0], dft_shift[:, :, 1])
-
-    # normalize
-    magnitude_spectrum_normalized = magnitude_spectrum / np.sum(magnitude_spectrum)
-
-    # frequency domain entropy
-    fde = -np.sum(magnitude_spectrum_normalized * np.log(magnitude_spectrum_normalized))/np.log(image.shape[0] * image.shape[1])
-    # cv2.waitKey(0)
-    return fde
 
 
 def calculate_focus_laplace(image):
@@ -154,7 +138,7 @@ if __name__ == "__main__":
     parser.add_argument('--topic', nargs='+', dest='topics', help='camera topic', required=True)
     parsed = parser.parse_args()
 
-    rospy.init_node('kalibr_validator', anonymous=True)
+    rospy.init_node('camera_focuser', anonymous=True)
 
     for topic in parsed.topics:
         camval = CameraFocus(topic)
