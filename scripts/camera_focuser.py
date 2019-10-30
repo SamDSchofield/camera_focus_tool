@@ -103,7 +103,9 @@ class CameraFocus:
         # convert image to opencv
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg)
-            cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+            if len(cv_image.shape) == 3:
+                cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+            
             np_image = np.array(cv_image)
         except CvBridgeError, e:
             print("Could not convert ros message to opencv image: ", e)
@@ -147,4 +149,3 @@ if __name__ == "__main__":
         rospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")
-
